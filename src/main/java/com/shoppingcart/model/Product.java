@@ -1,14 +1,16 @@
 package com.shoppingcart.model;
 
-import com.shoppingcart.exception.ProductNotFoundException;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class Product {
 
     private String name;
-    private double price;
+    private BigDecimal price;
+
+    public Product() {
+
+    }
 
     public String getName() {
         return this.name;
@@ -18,25 +20,20 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return this.price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = round(price, 2);
-        this.price = price;
     }
 
-    public Product() {
-
-    }
-
-    public Product(String name, double price) {
+    public Product(String name, BigDecimal price) {
         this.name = name;
         this.price = round(price, 2);
     }
 
-    public Product(Product product) throws ProductNotFoundException {
+    public Product(Product product) {
 
         if (product == null) {
             throw new IllegalArgumentException("Item cannot be null.");
@@ -46,11 +43,10 @@ public class Product {
         this.price = product.getPrice();
     }
 
-    public static double round(double value, int places) {
+    public static BigDecimal round(BigDecimal value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
-        BigDecimal bd = BigDecimal.valueOf(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        BigDecimal bd = value.setScale(places, RoundingMode.HALF_UP);
+        return bd;
     }
 }

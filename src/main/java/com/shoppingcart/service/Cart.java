@@ -2,6 +2,7 @@ package com.shoppingcart.service;
 
 import com.shoppingcart.model.Product;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,14 +11,14 @@ import java.util.List;
 public class Cart implements ICart {
 
     private List<Product> products = Collections.synchronizedList(new ArrayList<>());
-    private double totalPrice;
-    private double totalTaxAmount;
-    private double totalPriceWithTax;
+    private BigDecimal totalPrice;
+    private BigDecimal totalTaxAmount;
+    private BigDecimal totalPriceWithTax;
 
     public Cart() {
-        this.totalPrice = 0;
-        this.totalTaxAmount = 0;
-        this.totalPriceWithTax = 0;
+        this.totalPrice = BigDecimal.valueOf(0);
+        this.totalTaxAmount = BigDecimal.valueOf(0);
+        this.totalPriceWithTax = BigDecimal.valueOf(0);
     }
 
     public void empty() {
@@ -26,23 +27,25 @@ public class Cart implements ICart {
 
     public void add(Product product) {
         this.products.add(product);
-        this.totalPrice = Product.round(this.totalPrice + product.getPrice(), 2);
+        this.totalPrice = Product.round(this.totalPrice.add(product.getPrice()), 2);
 
-        double productTaxAmount = Product.round(product.getPrice() * 125 / 1000, 2);
-        double productAmountWithTax = Product.round(product.getPrice() + productTaxAmount, 2);
+        BigDecimal productTaxAmount = Product.round(product.getPrice().multiply(BigDecimal.valueOf(125))
+                .divide(BigDecimal.valueOf(1000)), 2);
 
-        this.totalTaxAmount = Product.round(this.totalTaxAmount + productTaxAmount, 2);
+        BigDecimal productAmountWithTax = Product.round(product.getPrice().add(productTaxAmount), 2);
 
-        this.totalPriceWithTax = this.totalPriceWithTax + productAmountWithTax ;
+        this.totalTaxAmount = Product.round(this.totalTaxAmount.add(productTaxAmount), 2);
+
+        this.totalPriceWithTax = Product.round(this.totalPriceWithTax.add(productAmountWithTax), 2) ;
     }
 
-    public double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return this.totalPrice;
     }
 
-    public double getTotalTaxAmount() { return this.totalTaxAmount; }
+    public BigDecimal getTotalTaxAmount() { return this.totalTaxAmount; }
 
-    public double getTotalPriceWithTax() { return this.totalPriceWithTax; }
+    public BigDecimal getTotalPriceWithTax() { return this.totalPriceWithTax; }
 
     public List<Product> getProducts() {
         return products;

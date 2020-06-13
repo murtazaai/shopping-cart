@@ -6,6 +6,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,20 +28,26 @@ public class StepDefinitions {
     }
 
     @And("^a product, (.*?) (.*?) with a unit price of (\\d+)\\.(\\d+)$")
-    public void a_product_with_a_unit_price_of(String productName, String productCategory, int priceBeforeDecimal, int priceAfterDecimal) {
-        Product product = new Product(productName + " " + productCategory, Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal));
+    public void a_product_with_a_unit_price_of(String productName, String productCategory,
+                                               int priceBeforeDecimal, int priceAfterDecimal) {
+        BigDecimal expected = BigDecimal.valueOf(
+                Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal));
+        Product product = new Product(productName + " " + productCategory, expected);
 
         listOfProducts.add(product);
 
         assertEquals(productName + " " + productCategory, product.getName());
-        assertEquals(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal), product.getPrice(), DELTA);
+        assertEquals(expected,
+                product.getPrice());
     }
 
     @When("^the user adds (\\d+) (.*?) (.*?) to the shopping cart$")
     public void the_user_adds_to_the_shopping_cart(int count, String productName, String productCategory) {
         String productNameWithCategory = productName + " " + productCategory.substring(0, productName.length());
 
-        List<Product> products = listOfProducts.stream().filter(product -> product.getName().equals(productNameWithCategory)).collect(Collectors.toList());
+        List<Product> products = listOfProducts.stream()
+                .filter(product -> product.getName().equals(productNameWithCategory))
+                .collect(Collectors.toList());
 
         for (int i =0; i < count; i++) {
             cart.add(new Product(productNameWithCategory, products.get(0).getPrice()));
@@ -48,13 +55,14 @@ public class StepDefinitions {
 
         for (int i =(cart.getProducts().size() - count) ; i < count; i++) {
             assertEquals(productNameWithCategory, cart.getProducts().get(i).getName());
-            assertEquals(39.99, cart.getProducts().get(i).getPrice(), DELTA);
+            assertEquals(BigDecimal.valueOf(39.99), cart.getProducts().get(i).getPrice());
         }
     }
 
     @And("^the shopping cart’s total price should equal (\\d+)\\.(\\d+)$")
     public void the_shopping_carts_total_price_should_equal(int priceBeforeDecimal, int priceAfterDecimal) {
-        assertEquals(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal), cart.getTotalPrice(), DELTA);
+        assertEquals(BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal)),
+                cart.getTotalPrice());
     }
 
     @Then("^the shopping cart should contain (\\d+) (.*?) (.*?) each with a unit price of (\\d+)\\.(\\d+)$")
@@ -66,26 +74,28 @@ public class StepDefinitions {
         assertEquals(count, products.size(), DELTA);
 
         products.forEach(product -> {
-            assertEquals(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal), product.getPrice(), DELTA);
+            assertEquals(BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal)),
+                    product.getPrice());
         });
     }
 
     @And("^a tax rate of (\\d+)\\.(\\d+) percent$")
     public void a_tax_rate_of_percent(int taxBeforeDecimal, int taxAfterDecimal) {
         cart.getProducts().forEach(product -> {
-            product.setPrice(product.getPrice() + product.getPrice() * 125 / 1000);
+            product.setPrice(product.getPrice().add(product.getPrice().multiply(BigDecimal.valueOf(125)
+                    .divide(BigDecimal.valueOf(1000)))));
         });
     }
 
     @And("^the total tax amount should equal (\\d+)\\.(\\d+)$")
     public void the_total_tax_amount_should_equal(int taxAmountBeforeDecimal, int taxAmountAfterDecimal) {
-        assertEquals(Double.parseDouble(taxAmountBeforeDecimal + "." + taxAmountAfterDecimal), cart.getTotalTaxAmount(), DELTA);
+        assertEquals(Product.round(BigDecimal.valueOf(Double.parseDouble(taxAmountBeforeDecimal + "." + taxAmountAfterDecimal)), 2), cart.getTotalTaxAmount());
     }
 
     @And("^the shopping cart’s total price with tax should equal (\\d+)\\.(\\d+)$")
     public void the_shopping_carts_total_price_with_tax_should_equal(int priceBeforeDecimal, int priceAfterDecimal) {
-        double expectedTotalPrice = Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal);
+        BigDecimal expectedTotalPrice = BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal));
 
-        assertEquals(expectedTotalPrice, cart.getTotalPriceWithTax(), DELTA);
+        assertEquals(expectedTotalPrice, cart.getTotalPriceWithTax());
     }
 }
