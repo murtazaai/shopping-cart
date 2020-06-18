@@ -1,5 +1,6 @@
 package com.shoppingcart.service;
 
+import com.shoppingcart.model.Offer;
 import com.shoppingcart.model.Product;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -48,15 +49,18 @@ public class StepDefinitions {
         List<Product> products = listOfProducts.stream()
                 .filter(product -> product.getName().equals(productNameWithCategory))
                 .collect(Collectors.toList());
-
+        Product product = new Product(productNameWithCategory, products.get(0).getPrice());
         for (int i =0; i < count; i++) {
-            cart.add(new Product(productNameWithCategory, products.get(0).getPrice()));
+            cart.add(product);
         }
 
         for (int i =(cart.getProducts().size() - count) ; i < count; i++) {
             assertEquals(productNameWithCategory, cart.getProducts().get(i).getName());
             assertEquals(BigDecimal.valueOf(39.99), cart.getProducts().get(i).getPrice());
         }
+
+        cart.applyOffers();
+
     }
 
     @And("^the shopping cart’s total price should equal (\\d+)\\.(\\d+)$")
@@ -98,4 +102,34 @@ public class StepDefinitions {
 
         assertEquals(expectedTotalPrice, cart.getTotalPriceWithTax());
     }
+
+    @Given("^a product, (.*?) (.*?) with a unit price of (\\d+)\\.(\\d+) and an associated buy (\\d+) get (\\d+) free offer$")
+    public void  a_product_with_a_unit_price_of_and_an_associated_buy_get_free_offer(String productName, String productCategory, int priceBeforeDecimal, int priceAfterDecimal, int buyCount, int freeCount) {
+        Product product = new Product(productName + " " + productCategory, BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal)));
+        for (int i = 0; i < buyCount; i++) {
+            listOfProducts.add(product);
+        }
+        Offer offer = new Offer(product, buyCount, freeCount);
+        cart.createOffer(offer);
+
+        assertTrue(Boolean.TRUE);
+
+    }
+
+    @And("^a product, (.*?) (.*?) with a unit price of (\\d+)\\.(\\d+) and no associated offer$")
+    public void a_product_with_a_unit_price_of_and_no_associated_offer(String productName, String productCategory, int priceBeforeDecimal, int priceAfterDecimal) {
+        Product product = new Product(productName + " " + productCategory, BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal)));
+        listOfProducts.add(product);
+
+        assertTrue(Boolean.TRUE);
+    }
+
+    @And("^the shopping cart’s discount should equal (\\d+)\\.(\\d+)$")
+    public void the_shopping_cart_discount_should_equal(int priceBeforeDecimal, int priceAfterDecimal) {
+        assertEquals(BigDecimal.valueOf(Double.parseDouble(priceBeforeDecimal + "." + priceAfterDecimal)), cart.getDiscount());
+    }
+
+
 }
+
+

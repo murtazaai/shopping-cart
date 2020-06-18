@@ -7,9 +7,11 @@ public class Product {
 
     private String name;
     private BigDecimal price;
+    private BigDecimal taxAmount;
+    private Boolean isFree;
 
     public Product() {
-
+        this.isFree = Boolean.FALSE;
     }
 
     public String getName() {
@@ -28,9 +30,28 @@ public class Product {
         this.price = round(price, 2);
     }
 
+    public Boolean getIsFree() {
+        return this.isFree;
+    }
+
+    public void setIsFree(Boolean isFree) {
+        this.isFree = isFree;
+    }
+
+
+    public void setTaxAmount(BigDecimal taxAmount) {
+        this.taxAmount = taxAmount;
+    }
+
+    public BigDecimal getTaxAmount() {
+        return taxAmount;
+    }
+
     public Product(String name, BigDecimal price) {
         this.name = name;
         this.price = round(price, 2);
+        this.isFree = Boolean.FALSE;
+        this.taxAmount = BigDecimal.valueOf(0);
     }
 
     public Product(Product product) {
@@ -41,6 +62,8 @@ public class Product {
 
         this.name = product.name;
         this.price = product.getPrice();
+        this.isFree = Boolean.FALSE;
+        this.taxAmount = BigDecimal.valueOf(0);
     }
 
     public static BigDecimal round(BigDecimal value, int places) {
