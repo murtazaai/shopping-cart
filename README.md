@@ -60,3 +60,11 @@ should result in 0.57 but 0.564 result in 0.56
 
 ## BDD Test (Cucumber)
 `mvn clean verify -Dit.test=ICartRunner -Dcucumber.options=" --format html:report/cucumber-html-report-myReport"`
+
+## 👤 Author
+
+**Murtaza Ali Imtiaz**
+
+- LinkedIn: [LinkedIn](https://linkedin.com/in/murtazai)
+- GitHub: [@murtazaai](https://github.com/murtazaai)
+- Portfolio: [murtazai.com](https://murtazai.com)
